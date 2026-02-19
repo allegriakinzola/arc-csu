@@ -1,0 +1,410 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Better-auth models
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  role          String    @default("user")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  sessions      Session[]
+  accounts      Account[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// ============================================
+// CATÉGORISATION SECTORIELLE (Hiérarchie géographique)
+// Province > Zone de Santé > Aire de Santé > Établissements
+// ============================================
+
+model Province {
+  id          String       @id @default(cuid())
+  code        String       @unique
+  name        String
+  description String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  zonesSante  ZoneSante[]
+}
+
+model ZoneSante {
+  id          String      @id @default(cuid())
+  code        String      @unique
+  name        String
+  description String?
+  provinceId  String
+  province    Province    @relation(fields: [provinceId], references: [id], onDelete: Cascade)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  airesSante  AireSante[]
+}
+
+model AireSante {
+  id           String        @id @default(cuid())
+  code         String        @unique
+  name         String
+  description  String?
+  zoneSanteId  String
+  zoneSante    ZoneSante     @relation(fields: [zoneSanteId], references: [id], onDelete: Cascade)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  etablissements Etablissement[]
+}
+
+// ============================================
+// CATÉGORISATION PAR TYPE
+// ESS = Établissement de Soins de Santé
+// EPVG = Établissement Pharmaceutique de Vente en Gros
+// ============================================
+
+enum TypeEtablissement {
+  ESS   // Établissement de Soins de Santé
+  EPVG  // Établissement Pharmaceutique de Vente en Gros
+}
+
+enum StatutEtablissement {
+  ACTIF
+  INACTIF
+  SUSPENDU
+  EN_ATTENTE
+}
+
+enum StatutAccreditation {
+  NON_ACCREDITE
+  EN_COURS
+  ACCREDITE
+  EXPIRE
+  REFUSE
+}
+
+// Sous-types pour ESS (Établissements de Soins de Santé)
+enum SousTypeESS {
+  HOPITAL_GENERAL
+  HOPITAL_SPECIALISE
+  CLINIQUE
+  CENTRE_SANTE
+  CENTRE_SANTE_REFERENCE
+  POSTE_SANTE
+  DISPENSAIRE
+  CABINET_MEDICAL
+  LABORATOIRE
+  CENTRE_IMAGERIE
+  AUTRE
+}
+
+// Sous-types pour EPVG (Établissements Pharmaceutiques de Vente en Gros)
+enum SousTypeEPVG {
+  GROSSISTE_REPARTITEUR
+  DISTRIBUTEUR
+  IMPORTATEUR
+  FABRICANT
+  DEPOT_PHARMACEUTIQUE
+  CENTRALE_ACHAT
+  AUTRE
+}
+
+model Etablissement {
+  id                  String              @id @default(cuid())
+  code                String              @unique
+  raisonSociale       String
+  sigle               String?
+  type                TypeEtablissement
+  sousTypeESS         SousTypeESS?
+  sousTypeEPVG        SousTypeEPVG?
+  statut              StatutEtablissement @default(EN_ATTENTE)
+  statutAccreditation StatutAccreditation @default(NON_ACCREDITE)
+  
+  // Localisation
+  aireSanteId         String
+  aireSante           AireSante           @relation(fields: [aireSanteId], references: [id])
+  adresse             String?
+  quartier            String?
+  avenue              String?
+  numero              String?
+  coordonneesGPS      String?
+  latitude            Float?
+  longitude           Float?
+  
+  // Contact
+  telephone           String?
+  telephoneSecondaire String?
+  email               String?
+  siteWeb             String?
+  
+  // Responsable
+  nomResponsable      String?
+  fonctionResponsable String?
+  telephoneResponsable String?
+  emailResponsable    String?
+  
+  // Informations légales
+  numeroRCCM          String?
+  numeroIdNat         String?
+  numeroImpot         String?
+  dateCreation        DateTime?
+  dateOuverture       DateTime?
+  
+  // Capacité (pour ESS)
+  nombreLits          Int?
+  nombrePersonnel     Int?
+  
+  // Informations RSSP
+  numeroIdentifiantRSSP String?   @unique
+  dateIdentificationRSSP DateTime?
+  
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+  createdById         String?
+  
+  // Relations
+  declarations        Declaration[]
+  evaluations         Evaluation[]
+  accreditations      Accreditation[]
+}
+
+// ============================================
+// DÉCLARATIONS RSSP
+// ============================================
+
+enum TypeDeclaration {
+  MENSUELLE   // Déclaration mensuelle des recettes
+  TRIMESTRIELLE // Déclaration trimestrielle des stocks
+}
+
+enum StatutDeclaration {
+  BROUILLON
+  SOUMISE
+  VALIDEE
+  REJETEE
+  EN_REVISION
+}
+
+model Declaration {
+  id              String            @id @default(cuid())
+  reference       String            @unique
+  type            TypeDeclaration
+  statut          StatutDeclaration @default(BROUILLON)
+  
+  // Période
+  mois            Int?
+  trimestre       Int?
+  annee           Int
+  
+  // Montants (pour déclaration mensuelle)
+  montantRecettes Decimal?          @db.Decimal(18, 2)
+  montantRSSP     Decimal?          @db.Decimal(18, 2)
+  tauxRSSP        Decimal?          @db.Decimal(5, 4)
+  
+  // Dates
+  dateDeclaration DateTime?
+  dateSoumission  DateTime?
+  dateValidation  DateTime?
+  datePaiement    DateTime?
+  
+  // Paiement
+  montantPaye     Decimal?          @db.Decimal(18, 2)
+  referencePaiement String?
+  
+  // Commentaires
+  observations    String?
+  motifRejet      String?
+  
+  // Relations
+  etablissementId String
+  etablissement   Etablissement     @relation(fields: [etablissementId], references: [id])
+  validePar       String?
+  
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  
+  lignesStock     LigneStock[]
+}
+
+// Lignes de stock pour déclaration trimestrielle
+model LigneStock {
+  id              String      @id @default(cuid())
+  declarationId   String
+  declaration     Declaration @relation(fields: [declarationId], references: [id], onDelete: Cascade)
+  
+  designation     String
+  categorie       String?
+  unite           String?
+  quantiteInitiale Int?
+  quantiteEntree  Int?
+  quantiteSortie  Int?
+  quantiteFinale  Int?
+  valeurUnitaire  Decimal?    @db.Decimal(18, 2)
+  valeurTotale    Decimal?    @db.Decimal(18, 2)
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+// ============================================
+// CONFORMITÉ ET ÉVALUATION
+// ============================================
+
+model CritereEvaluation {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  libelle     String
+  description String?
+  categorie   String
+  ponderation Int      @default(1)
+  obligatoire Boolean  @default(false)
+  actif       Boolean  @default(true)
+  
+  // Type d'établissement concerné
+  typeEtablissement TypeEtablissement?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  evaluationDetails EvaluationDetail[]
+}
+
+model Evaluation {
+  id              String      @id @default(cuid())
+  reference       String      @unique
+  dateEvaluation  DateTime
+  
+  // Scores
+  scoreTotal      Decimal?    @db.Decimal(5, 2)
+  scoreMaximum    Decimal?    @db.Decimal(5, 2)
+  pourcentage     Decimal?    @db.Decimal(5, 2)
+  
+  // Résultat
+  conforme        Boolean     @default(false)
+  observations    String?
+  recommandations String?
+  
+  // Relations
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id])
+  evaluateurId    String?
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  
+  details         EvaluationDetail[]
+}
+
+model EvaluationDetail {
+  id           String            @id @default(cuid())
+  evaluationId String
+  evaluation   Evaluation        @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
+  critereId    String
+  critere      CritereEvaluation @relation(fields: [critereId], references: [id])
+  
+  score        Int               @default(0)
+  conforme     Boolean           @default(false)
+  observation  String?
+  
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+}
+
+// ============================================
+// ACCRÉDITATION
+// ============================================
+
+enum StatutDemandeAccreditation {
+  SOUMISE
+  EN_EXAMEN
+  INSPECTION_PLANIFIEE
+  INSPECTION_EFFECTUEE
+  EN_DELIBERATION
+  APPROUVEE
+  REJETEE
+  ANNULEE
+}
+
+model Accreditation {
+  id                String                     @id @default(cuid())
+  reference         String                     @unique
+  
+  // Dates
+  dateDemande       DateTime                   @default(now())
+  dateExamen        DateTime?
+  dateInspection    DateTime?
+  dateDeliberation  DateTime?
+  dateDecision      DateTime?
+  dateExpiration    DateTime?
+  
+  // Statut
+  statut            StatutDemandeAccreditation @default(SOUMISE)
+  
+  // Décision
+  decision          String?
+  motifRejet        String?
+  conditions        String?
+  dureeValidite     Int?                       // en mois
+  
+  // Documents
+  documentsJoints   String?
+  
+  // Relations
+  etablissementId   String
+  etablissement     Etablissement              @relation(fields: [etablissementId], references: [id])
+  evaluationId      String?
+  traitePar         String?
+  
+  createdAt         DateTime                   @default(now())
+  updatedAt         DateTime                   @updatedAt
+}
