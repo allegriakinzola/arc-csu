@@ -38,6 +38,7 @@ import {
   Bell,
   MapPin,
   Shield,
+  BarChart3,
 } from "lucide-react";
 
 const menuItems = [
@@ -55,6 +56,11 @@ const menuItems = [
     title: "Carte",
     href: "/dashboard/carte",
     icon: MapPin,
+  },
+  {
+    title: "Statistiques",
+    href: "/dashboard/statistiques",
+    icon: BarChart3,
   },
   {
     title: "Utilisateurs",
