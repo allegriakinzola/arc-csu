@@ -226,7 +226,7 @@ export default function NouvelEtablissementPage() {
             Nouvel établissement
           </h2>
           <p className="text-muted-foreground">
-            Enregistrer un nouvel établissement dans le système RSSP
+            Enregistrer un nouvel établissement dans le système ARC-CSU
           </p>
         </div>
       </div>

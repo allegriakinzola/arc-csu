@@ -340,7 +340,7 @@ export default function EtablissementDetailPage({
           <CardContent className="pt-6">
             <div className="text-center">
               <p className="text-xs text-muted-foreground mb-1">
-                Identifiant RSSP
+                Identifiant ARC-CSU
               </p>
               <p className="text-sm font-bold font-mono text-primary">
                 {etablissement.numeroIdentifiantRSSP || "—"}

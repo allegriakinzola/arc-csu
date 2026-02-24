@@ -201,7 +201,7 @@ export default function DashboardLayout({
           <div className="flex-1">
             <h1 className="text-lg font-semibold">
               {menuItems.find((item) => item.href === pathname)?.title ||
-                "RSSP"}
+                "ARC-CSU"}
             </h1>
           </div>
           <Button variant="ghost" size="icon" className="relative">

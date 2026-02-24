@@ -109,7 +109,7 @@ export default function DashboardPage() {
           Bienvenue, {session?.user?.name || "Utilisateur"}!
         </h2>
         <p className="text-muted-foreground">
-          Voici un aperçu de l&apos;activité de la plateforme RSSP.
+          Voici un aperçu de l&apos;activité de la plateforme ARC-CSU.
         </p>
       </div>
 

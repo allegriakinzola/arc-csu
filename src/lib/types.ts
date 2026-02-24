@@ -100,8 +100,8 @@ export interface Etablissement {
   dateOuverture?: string;
   nombreLits?: number;
   nombrePersonnel?: number;
-  numeroIdentifiantRSSP?: string;
-  dateIdentificationRSSP?: string;
+  numeroIdentifiantRSSP?: string; // Identifiant ARC-CSU (legacy field name)
+  dateIdentificationRSSP?: string; // Date identification ARC-CSU (legacy field name)
   createdAt: string;
   updatedAt: string;
 }

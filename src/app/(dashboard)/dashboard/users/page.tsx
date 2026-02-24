@@ -116,7 +116,7 @@ export default function UsersPage() {
             Gestion des utilisateurs
           </h2>
           <p className="text-muted-foreground">
-            Gérez les comptes utilisateurs de la plateforme RSSP
+            Gérez les comptes utilisateurs de la plateforme ARC-CSU
           </p>
         </div>
         <Button>

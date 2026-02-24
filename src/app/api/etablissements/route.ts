@@ -105,10 +105,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Générer le numéro identifiant RSSP
+    // Générer le numéro identifiant ARC-CSU
     const year = new Date().getFullYear();
     const count = await prisma.etablissement.count();
-    const numeroIdentifiantRSSP = `RSSP-${type}-${year}-${String(count + 1).padStart(6, "0")}`;
+    const numeroIdentifiantRSSP = `ARC-CSU-${type}-${year}-${String(count + 1).padStart(6, "0")}`;
 
     const etablissement = await prisma.etablissement.create({
       data: {
