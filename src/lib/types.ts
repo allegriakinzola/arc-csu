@@ -161,12 +161,13 @@ export const SOUS_TYPES_EPVG: Record<SousTypeEPVG, string> = {
   AUTRE: "Autre",
 };
 
-export const STATUTS_ETABLISSEMENT: Record<StatutEtablissement, string> = {
+export const STATUTS_ETABLISSEMENT = {
   ACTIF: "Actif",
   INACTIF: "Inactif",
   SUSPENDU: "Suspendu",
   EN_ATTENTE: "En attente",
-};
+  REJETE: "Rejeté",
+} as const;
 
 export const STATUTS_ACCREDITATION: Record<StatutAccreditation, string> = {
   NON_ACCREDITE: "Non accrédité",
@@ -175,3 +176,26 @@ export const STATUTS_ACCREDITATION: Record<StatutAccreditation, string> = {
   EXPIRE: "Expiré",
   REFUSE: "Refusé",
 };
+
+// Descentes
+export type StatutDescente = "ACTIVE" | "EXPIREE" | "ANNULEE";
+
+export const STATUTS_DESCENTE: Record<StatutDescente, string> = {
+  ACTIVE: "Active",
+  EXPIREE: "Expirée",
+  ANNULEE: "Annulée",
+};
+
+export interface Descente {
+  id: string;
+  code: string;
+  nom: string;
+  description?: string;
+  motDePasse: string;
+  dateDebut: string;
+  dateFin: string;
+  statut: StatutDescente;
+  createdById?: string;
+  createdAt: string;
+  updatedAt: string;
+}

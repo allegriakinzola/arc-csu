@@ -129,6 +129,24 @@ export default function DashboardPage() {
             </p>
           </CardContent>
         </Card>
+        <Link href="/dashboard/etablissements/en-attente">
+          <Card className="hover:bg-accent transition-colors cursor-pointer">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                En attente
+              </CardTitle>
+              <Clock className="h-4 w-4 text-yellow-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-yellow-600">
+                {stats?.parStatut.EN_ATTENTE ?? 0}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                à examiner et approuver
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">ESS</CardTitle>

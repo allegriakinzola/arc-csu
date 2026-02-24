@@ -15,13 +15,16 @@ export async function GET(request: NextRequest) {
 
     if (type) where.type = type;
     if (aireSanteId) where.aireSanteId = aireSanteId;
-    if (statut) where.statut = statut;
     if (search) {
       where.OR = [
         { raisonSociale: { contains: search, mode: "insensitive" } },
         { code: { contains: search, mode: "insensitive" } },
         { numeroIdentifiantRSSP: { contains: search, mode: "insensitive" } },
       ];
+    }
+
+    if (statut) {
+      where.statut = statut;
     }
 
     const [etablissements, total] = await Promise.all([
@@ -67,7 +70,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const {
-      code,
+      numeroRCCM,
       raisonSociale,
       sigle,
       type,
@@ -89,26 +92,32 @@ export async function POST(request: NextRequest) {
       fonctionResponsable,
       telephoneResponsable,
       emailResponsable,
-      numeroRCCM,
       numeroIdNat,
       numeroImpot,
       dateCreation,
       dateOuverture,
       nombreLits,
       nombrePersonnel,
+      descenteId,
     } = body;
 
-    if (!code || !raisonSociale || !type || !aireSanteId) {
+    if (!numeroRCCM || !raisonSociale || !type || !aireSanteId) {
       return NextResponse.json(
-        { error: "Le code, la raison sociale, le type et l'aire de santé sont requis" },
+        { error: "Le numéro RCCM, la raison sociale, le type et l'aire de santé sont requis" },
         { status: 400 }
       );
     }
 
-    // Générer le numéro identifiant ARC-CSU
+    // Générer le code automatiquement à partir du RCCM ou séquentiellement
     const year = new Date().getFullYear();
     const count = await prisma.etablissement.count();
-    const numeroIdentifiantRSSP = `ARC-CSU-${type}-${year}-${String(count + 1).padStart(6, "0")}`;
+    const code = `${type}-${year}-${String(count + 1).padStart(6, "0")}`;
+
+    // Générer le numéro identifiant ARC-CSU
+    const numeroIdentifiantRSSP = `ARC-CSU-${code}`;
+
+    // Déterminer le statut : EN_ATTENTE si créé via descente, ACTIF sinon
+    const statut = descenteId ? "EN_ATTENTE" : "ACTIF";
 
     const etablissement = await prisma.etablissement.create({
       data: {
@@ -118,7 +127,9 @@ export async function POST(request: NextRequest) {
         type,
         sousTypeESS: type === "ESS" ? sousTypeESS : null,
         sousTypeEPVG: type === "EPVG" ? sousTypeEPVG : null,
+        statut,
         aireSanteId,
+        descenteId: descenteId || null,
         adresse,
         quartier,
         avenue,

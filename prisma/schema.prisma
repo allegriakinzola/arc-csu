@@ -123,6 +123,7 @@ enum StatutEtablissement {
   INACTIF
   SUSPENDU
   EN_ATTENTE
+  REJETE
 }
 
 enum StatutAccreditation {
@@ -167,7 +168,7 @@ model Etablissement {
   type                TypeEtablissement
   sousTypeESS         SousTypeESS?
   sousTypeEPVG        SousTypeEPVG?
-  statut              StatutEtablissement @default(EN_ATTENTE)
+  statut              StatutEtablissement @default(ACTIF)
   statutAccreditation StatutAccreditation @default(NON_ACCREDITE)
   
   // Localisation
@@ -211,6 +212,10 @@ model Etablissement {
   createdAt           DateTime    @default(now())
   updatedAt           DateTime    @updatedAt
   createdById         String?
+  
+  // Descente (collecte de données sur le terrain)
+  descenteId          String?
+  descente            Descente?   @relation(fields: [descenteId], references: [id])
   
   // Relations
   declarations        Declaration[]
@@ -407,4 +412,37 @@ model Accreditation {
   
   createdAt         DateTime                   @default(now())
   updatedAt         DateTime                   @updatedAt
+}
+
+// ============================================
+// DESCENTES (Collecte de données sur le terrain)
+// ============================================
+
+enum StatutDescente {
+  ACTIVE
+  EXPIREE
+  ANNULEE
+}
+
+model Descente {
+  id              String          @id @default(cuid())
+  code            String          @unique
+  nom             String
+  description     String?
+  motDePasse      String
+  
+  // Période de validité
+  dateDebut       DateTime
+  dateFin         DateTime
+  
+  // Statut
+  statut          StatutDescente  @default(ACTIVE)
+  
+  // Métadonnées
+  createdById     String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  // Relations
+  etablissements  Etablissement[]
 }

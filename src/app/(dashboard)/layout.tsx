@@ -36,6 +36,7 @@ import {
   MapPin,
   Shield,
   BarChart3,
+  Clipboard,
 } from "lucide-react";
 
 const menuItems = [
@@ -48,6 +49,16 @@ const menuItems = [
     title: "Établissements",
     href: "/dashboard/etablissements",
     icon: Building2,
+  },
+  {
+    title: "En attente",
+    href: "/dashboard/etablissements/en-attente",
+    icon: Shield,
+  },
+  {
+    title: "Descentes",
+    href: "/dashboard/descentes",
+    icon: Clipboard,
   },
   {
     title: "Carte",

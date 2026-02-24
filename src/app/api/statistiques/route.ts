@@ -22,16 +22,22 @@ export async function GET(request: NextRequest) {
       evalDateFilter.dateEvaluation = { ...evalDateFilter.dateEvaluation, lte: fin };
     }
 
+    // Filtre pour exclure les établissements EN_ATTENTE
+    const baseFilter = {
+      statut: { not: "EN_ATTENTE" as const },
+      ...dateFilter,
+    };
+
     // 1. Comptages généraux par type
     const [totalESS, totalEPVG] = await Promise.all([
-      prisma.etablissement.count({ where: { type: "ESS", ...dateFilter } }),
-      prisma.etablissement.count({ where: { type: "EPVG", ...dateFilter } }),
+      prisma.etablissement.count({ where: { type: "ESS", ...baseFilter } }),
+      prisma.etablissement.count({ where: { type: "EPVG", ...baseFilter } }),
     ]);
 
     // 2. Comptages par statut d'accréditation et type
     const accreditationParType = await prisma.etablissement.groupBy({
       by: ["type", "statutAccreditation"],
-      where: dateFilter.createdAt ? dateFilter : undefined,
+      where: baseFilter,
       _count: { id: true },
     });
 
