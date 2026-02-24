@@ -41,6 +41,7 @@ import {
   AlertTriangle,
   BedDouble,
   Users,
+  FileDown,
 } from "lucide-react";
 import {
   Etablissement,
@@ -301,6 +302,17 @@ export default function EtablissementDetailPage({
           </div>
         </div>
         <div className="flex gap-2 ml-14 md:ml-0">
+          {etablissement.statutAccreditation === "ACCREDITE" && (
+            <Button
+              variant="default"
+              onClick={() => {
+                window.open(`/api/etablissements/${id}/certificat`, "_blank");
+              }}
+            >
+              <FileDown className="mr-2 h-4 w-4" />
+              Certificat
+            </Button>
+          )}
           <Link href={`/dashboard/etablissements/${id}/modifier`}>
             <Button variant="outline">
               <Edit className="mr-2 h-4 w-4" />
