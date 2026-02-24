@@ -31,11 +31,8 @@ import {
   Building2,
   LayoutDashboard,
   Users,
-  FileText,
-  Settings,
   LogOut,
   ChevronUp,
-  Bell,
   MapPin,
   Shield,
   BarChart3,
@@ -66,16 +63,6 @@ const menuItems = [
     title: "Utilisateurs",
     href: "/dashboard/users",
     icon: Users,
-  },
-  {
-    title: "Déclarations",
-    href: "/dashboard/declarations",
-    icon: FileText,
-  },
-  {
-    title: "Paramètres",
-    href: "/dashboard/settings",
-    icon: Settings,
   },
 ];
 
@@ -172,13 +159,6 @@ export default function DashboardLayout({
                 >
                   <DropdownMenuLabel>Mon compte</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/dashboard/settings">
-                      <Settings className="mr-2 h-4 w-4" />
-                      Paramètres
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={handleLogout}
                     disabled={isLoggingOut}
@@ -204,12 +184,6 @@ export default function DashboardLayout({
                 "ARC-CSU"}
             </h1>
           </div>
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell className="h-5 w-5" />
-            <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-destructive text-[10px] font-medium text-white flex items-center justify-center">
-              3
-            </span>
-          </Button>
         </header>
         <main className="flex-1 p-6">{children}</main>
       </SidebarInset>
