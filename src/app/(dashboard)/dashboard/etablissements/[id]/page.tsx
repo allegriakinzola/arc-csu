@@ -42,7 +42,9 @@ import {
   BedDouble,
   Users,
   FileDown,
+  Eye,
 } from "lucide-react";
+import { PDFPreviewModal } from "@/components/pdf-preview-modal";
 import {
   Etablissement,
   CritereEvaluation,
@@ -138,6 +140,7 @@ export default function EtablissementDetailPage({
   const [pourcentage, setPourcentage] = useState(0);
   const [scoreTotal, setScoreTotal] = useState(0);
   const [scoreMaximum, setScoreMaximum] = useState(0);
+  const [showPdfPreview, setShowPdfPreview] = useState(false);
 
   useEffect(() => {
     const fetchEtablissement = async () => {
@@ -305,12 +308,10 @@ export default function EtablissementDetailPage({
           {etablissement.statutAccreditation === "ACCREDITE" && (
             <Button
               variant="default"
-              onClick={() => {
-                window.open(`/api/etablissements/${id}/certificat`, "_blank");
-              }}
+              onClick={() => setShowPdfPreview(true)}
             >
-              <FileDown className="mr-2 h-4 w-4" />
-              Certificat
+              <Eye className="mr-2 h-4 w-4" />
+              Voir certificat
             </Button>
           )}
           <Link href={`/dashboard/etablissements/${id}/modifier`}>
@@ -819,6 +820,16 @@ export default function EtablissementDetailPage({
           </div>
         </CardContent>
       </Card>
+
+      {/* PDF Preview Modal */}
+      {etablissement && (
+        <PDFPreviewModal
+          open={showPdfPreview}
+          onOpenChange={setShowPdfPreview}
+          pdfUrl={`/api/etablissements/${id}/certificat`}
+          fileName={`Certificat_Accreditation_${etablissement.code}.pdf`}
+        />
+      )}
     </div>
   );
 }

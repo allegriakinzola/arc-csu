@@ -10,6 +10,8 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
+    const { searchParams } = new URL(request.url);
+    const download = searchParams.get("download") === "true";
 
     const etablissement = await prisma.etablissement.findUnique({
       where: { id },
@@ -100,10 +102,14 @@ export async function GET(
     }
     const buffer = Buffer.concat(chunks);
 
+    const disposition = download
+      ? `attachment; filename="Certificat_Accreditation_${etablissement.code}.pdf"`
+      : `inline; filename="Certificat_Accreditation_${etablissement.code}.pdf"`;
+
     return new NextResponse(buffer, {
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="Certificat_Accreditation_${etablissement.code}.pdf"`,
+        "Content-Disposition": disposition,
       },
     });
   } catch (error) {
